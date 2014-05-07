@@ -4,10 +4,13 @@
 
 # CC
 CC=gcc
+#使用的编译器gcc
 # Path to parent kernel include files directory
 LIBC_INCLUDE=/usr/include
+# 存放头文件目录的路径
 # Libraries
 ADDLIB=
+# 添加LIB文件
 # Linker flags
 LDFLAG_STATIC=-Wl,-Bstatic
 LDFLAG_DYNAMIC=-Wl,-Bdynamic
@@ -17,6 +20,7 @@ LDFLAG_CRYPTO=-lcrypto
 LDFLAG_IDN=-lidn
 LDFLAG_RESOLV=-lresolv
 LDFLAG_SYSFS=-lsysfs
+# 动态链接库
 
 #
 # Options
