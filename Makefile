@@ -12,8 +12,12 @@ LIBC_INCLUDE=/usr/include
 ADDLIB=
 # 添加LIB文件
 # Linker flags
+#Wl选项告诉编译器将后面的参数传递给链接器
+#-Wl,-Bstatic告诉链接器使用-Bstatic选项，该选项是告诉链接器，对接下来的-l选项使用静态链接
+#-Wl,-Bdynamic就是告诉链接器对接下来的-l选项使用动态链接
 LDFLAG_STATIC=-Wl,-Bstatic
 LDFLAG_DYNAMIC=-Wl,-Bdynamic
+#指定加载库
 LDFLAG_CAP=-lcap
 LDFLAG_GNUTLS=-lgnutls-openssl
 LDFLAG_CRYPTO=-lcrypto
@@ -25,17 +29,23 @@ LDFLAG_SYSFS=-lsysfs
 #
 # Options
 #
-
+#变量定义，设置开关
 # Capability support (with libcap) [yes|static|no]
+#支持库函数libcap
 USE_CAP=yes
 # sysfs support (with libsysfs - deprecated) [no|yes|static]
+# 支持sysfs文件系统，此文件系统用来表示设备的结构.将设备的层次结构形象的反应到用户空间中.
+# 用户空间可以修改sysfs中的文件属性来修改设备的属性值。
 USE_SYSFS=no
+#不支持sysfs
 # IDN support (experimental) [no|yes|static]
 USE_IDN=no
-
+#不支持IDN(域名)
 # Do not use getifaddrs [no|yes|static]
 WITHOUT_IFADDRS=no
+#不使用getifaddrs(获取本地网络接口信息)
 # arping default device (e.g. eth0) []
+# 默认设备arping(一个 ARP 级别的 ping 工具，可用来直接 ping MAC 地址，以及找出那些 ip 地址被哪些电脑所使用了。)
 ARPING_DEFAULT_DEVICE=
 
 # GNU TLS library for ping6 [yes|no|static]
@@ -53,9 +63,13 @@ ENABLE_RDISC_SERVER=no
 # -------------------------------------
 # What a pity, all new gccs are buggy and -Werror does not work. Sigh.
 # CCOPT=-fno-strict-aliasing -Wstrict-prototypes -Wall -Werror -g
+#-Wstrict-prototypes: 如果函数的声明或定义没有指出参数类型，编译器就发出警告
 CCOPT=-fno-strict-aliasing -Wstrict-prototypes -Wall -g
+# -g加入调试信息
 CCOPTOPT=-O3
+# 3级优化
 GLIBCFIX=-D_GNU_SOURCE
+# -D_GNU_SOURCE表示：编写符合 GNU 规范的代码
 DEFINES=
 LDLIB=
 
@@ -63,7 +77,10 @@ FUNC_LIB = $(if $(filter static,$(1)),$(LDFLAG_STATIC) $(2) $(LDFLAG_DYNAMIC),$(
 
 # USE_GNUTLS: DEF_GNUTLS, LIB_GNUTLS
 # USE_CRYPTO: LIB_CRYPTO
+# 条件判断语句
 ifneq ($(USE_GNUTLS),no)
+# 比较两个字符
+# 条件关键字是ifneq
 	LIB_CRYPTO = $(call FUNC_LIB,$(USE_GNUTLS),$(LDFLAG_GNUTLS))
 	DEF_CRYPTO = -DUSE_GNUTLS
 else
@@ -113,10 +130,10 @@ endif
 IPV4_TARGETS=tracepath ping clockdiff rdisc arping tftpd rarpd
 IPV6_TARGETS=tracepath6 traceroute6 ping6
 TARGETS=$(IPV4_TARGETS) $(IPV6_TARGETS)
-
+# 目标文件
 CFLAGS=$(CCOPTOPT) $(CCOPT) $(GLIBCFIX) $(DEFINES)
+# 预定义变量
 LDLIBS=$(LDLIB) $(ADDLIB)
-
 UNAME_N:=$(shell uname -n)
 LASTTAG:=$(shell git describe HEAD | sed -e 's/-.*//')
 TODAY=$(shell date +%Y/%m/%d)
@@ -126,6 +143,7 @@ TAG:=$(shell date --date=$(TODAY) +s%Y%m%d)
 
 # -------------------------------------
 .PHONY: all ninfod clean distclean man html check-kernel modules snapshot
+# 伪目标
 
 all: $(TARGETS)
 
@@ -135,7 +153,11 @@ all: $(TARGETS)
 	$(COMPILE.c) $< $(DEF_$(patsubst %.o,%,$@)) -o $@
 $(TARGETS): %: %.o
 	$(LINK.o) $^ $(LIB_$@) $(LDLIBS) -o $@
-
+# $< 依赖目标中的第一个目标名字 
+# $@ 表示目标
+# $^ 所有的依赖目标的集合 
+# 在$(patsubst %.o,%,$@ )中，patsubst把目标中的变量符合后缀是.o的全部删除,  DEF_ping
+# LINK.o把.o文件链接在一起的命令行,缺省值是$(CC) $(LDFLAGS) $(TARGET_ARCH)
 # -------------------------------------
 # arping
 DEF_arping = $(DEF_SYSFS) $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS)
@@ -146,6 +168,8 @@ DEF_arping += -DDEFAULT_DEVICE=\"$(ARPING_DEFAULT_DEVICE)\"
 endif
 
 # clockdiff
+# 在IP报文的首部和ICMP报文的首部都可以放入时间戳数据。
+# clockdiff程序正是使用时间戳来测算目的主机和本地主机的系统时间差。
 DEF_clockdiff = $(DEF_CAP)
 LIB_clockdiff = $(LIB_CAP)
 
