@@ -49,15 +49,20 @@ WITHOUT_IFADDRS=no
 ARPING_DEFAULT_DEVICE=
 
 # GNU TLS library for ping6 [yes|no|static]
+# ping6的gun tls库的状态为yes
 USE_GNUTLS=yes
 # Crypto library for ping6 [shared|static]
+# ping6的crypto库的状态为共享
 USE_CRYPTO=shared
 # Resolv library for ping6 [yes|static]
+# ping6的resolv的状态为yes
 USE_RESOLV=yes
 # ping6 source routing (deprecated by RFC5095) [no|yes|RFC3542]
+# ping6默认路径（不推荐使用的rfc5095）
 ENABLE_PING6_RTHDR=no
 
 # rdisc server (-r option) support [no|yes]
+# 不支持RDISC服务器
 ENABLE_RDISC_SERVER=no
 
 # -------------------------------------
@@ -77,9 +82,8 @@ FUNC_LIB = $(if $(filter static,$(1)),$(LDFLAG_STATIC) $(2) $(LDFLAG_DYNAMIC),$(
 
 # USE_GNUTLS: DEF_GNUTLS, LIB_GNUTLS
 # USE_CRYPTO: LIB_CRYPTO
-# 条件判断语句
+# 条件判断语句,判断是否重复
 ifneq ($(USE_GNUTLS),no)
-# 比较两个字符
 # 条件关键字是ifneq
 	LIB_CRYPTO = $(call FUNC_LIB,$(USE_GNUTLS),$(LDFLAG_GNUTLS))
 	DEF_CRYPTO = -DUSE_GNUTLS
@@ -88,9 +92,11 @@ else
 endif
 
 # USE_RESOLV: LIB_RESOLV
+# resolve加密解密函数库
 LIB_RESOLV = $(call FUNC_LIB,$(USE_RESOLV),$(LDFLAG_RESOLV))
 
 # USE_CAP:  DEF_CAP, LIB_CAP
+# cap函数库中的函数是否重复
 ifneq ($(USE_CAP),no)
 	DEF_CAP = -DCAPABILITIES
 	LIB_CAP = $(call FUNC_LIB,$(USE_CAP),$(LDFLAG_CAP))
@@ -179,13 +185,12 @@ DEF_ping  = $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS)
 LIB_ping  = $(LIB_CAP) $(LIB_IDN)
 DEF_ping6 = $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS) $(DEF_ENABLE_PING6_RTHDR) $(DEF_CRYPTO)
 LIB_ping6 = $(LIB_CAP) $(LIB_IDN) $(LIB_RESOLV) $(LIB_CRYPTO)
-
 ping: ping_common.o
 ping6: ping_common.o
 ping.o ping_common.o: ping_common.h
 ping6.o: ping_common.h in6_flowlabel.h
-
 # rarpd
+# 逆地址解析协议RARP
 DEF_rarpd =
 LIB_rarpd =
 
@@ -194,6 +199,7 @@ DEF_rdisc = $(DEF_ENABLE_RDISC_SERVER)
 LIB_rdisc =
 
 # tracepath
+# Traceroute是一个正确理解IP网络并了解路由原理的重要工具。
 DEF_tracepath = $(DEF_IDN)
 LIB_tracepath = $(LIB_IDN)
 
@@ -206,6 +212,7 @@ DEF_traceroute6 = $(DEF_CAP) $(DEF_IDN)
 LIB_traceroute6 = $(LIB_CAP) $(LIB_IDN)
 
 # tftpd
+# 简单文件传输协议tftpd
 DEF_tftpd =
 DEF_tftpsubs =
 LIB_tftpd =
@@ -226,6 +233,7 @@ ninfod:
 
 # -------------------------------------
 # modules / check-kernel are only for ancient kernels; obsolete
+# 模块/内核检查
 check-kernel:
 ifeq ($(KERNEL_INCLUDE),)
 	@echo "Please, set correct KERNEL_INCLUDE"; false
@@ -264,10 +272,15 @@ distclean: clean
 snapshot:
 	@if [ x"$(UNAME_N)" != x"pleiades" ]; then echo "Not authorized to advance snapshot"; exit 1; fi
 	@echo "[$(TAG)]" > RELNOTES.NEW
+	# 将"[$(TAG)]"写到RELNOTES.NEW
 	@echo >>RELNOTES.NEW
+	#  输出一个空格到RELNOTES.NEW
 	@git log --no-merges $(LASTTAG).. | git shortlog >> RELNOTES.NEW
+	# 将git log和git shortlog 的信息输出到RELNOTES.NEW
 	@echo >> RELNOTES.NEW
+	# 输出一个空格到RELNOTES.NEW
 	@cat RELNOTES >> RELNOTES.NEW
+	# 将
 	@mv RELNOTES.NEW RELNOTES
 	@sed -e "s/^%define ssdate .*/%define ssdate $(DATE)/" iputils.spec > iputils.spec.tmp
 	@mv iputils.spec.tmp iputils.spec
