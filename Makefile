@@ -280,14 +280,19 @@ snapshot:
 	@echo >> RELNOTES.NEW
 	# 输出一个空格到RELNOTES.NEW
 	@cat RELNOTES >> RELNOTES.NEW
-	# 将
+	# 将RELNOTES 输出到 RELNOTES.NEW中
 	@mv RELNOTES.NEW RELNOTES
+	# 将 RELNOTES.NEW改名为RELNOTES
 	@sed -e "s/^%define ssdate .*/%define ssdate $(DATE)/" iputils.spec > iputils.spec.tmp
 	@mv iputils.spec.tmp iputils.spec
 	@echo "static char SNAPSHOT[] = \"$(TAG)\";" > SNAPSHOT.h
 	@$(MAKE) -C doc snapshot
+	#生成 snapshot.doc文档
 	@$(MAKE) man
+	# 执行man命令
 	@git commit -a -m "iputils-$(TAG)"
+	# git commit 命令的-a 选项可只将所有被修改或者已删除的且已经被git管理的文档提交倒仓库中。
 	@git tag -s -m "iputils-$(TAG)" $(TAG)
+	# git tag列出已有的标签，-m 选项则指定了对应的标签说明
 	@git archive --format=tar --prefix=iputils-$(TAG)/ $(TAG) | bzip2 -9 > ../iputils-$(TAG).tar.bz2
-
+        # 提取tag指定的内容
